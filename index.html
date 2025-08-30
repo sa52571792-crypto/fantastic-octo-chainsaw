@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Camera Uploader</title>
+</head>
+<body>
+  <h2>Capture and Upload</h2>
+  <video id="video" width="320" height="240" autoplay></video>
+  <button id="snap">Capture</button>
+  <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+  <form id="uploadForm" method="post" enctype="multipart/form-data" action="/upload">
+    <input type="file" id="fileInput" name="photo" accept="image/*" capture="camera" style="display:none;">
+    <input type="submit" value="Upload">
+  </form>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const snap = document.getElementById('snap');
+    const fileInput = document.getElementById('fileInput');
+
+    // Get access to camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => { video.srcObject = stream; })
+      .catch(err => console.log("Camera access denied:", err));
+
+    snap.addEventListener("click", () => {
+      const context = canvas.getContext("2d");
+      context.drawImage(video, 0, 0, 320, 240);
+      canvas.toBlob(blob => {
+        const file = new File([blob], "capture.png", { type: "image/png" });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+      });
+    });
+  </script>
+</body>
+</html>
